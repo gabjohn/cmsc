@@ -1,12 +1,5 @@
 #include "polylib.h"
 
-// void init(list*);
-// int append(list*, term);
-// int deleteNode(list*, int);
-// void freeList(list*);
-// void display(list);
-// int tokenize(list*, char);
-
 int main() {
     list poly;
     char inputString[100];
@@ -15,9 +8,9 @@ int main() {
     // number of test cases
     scanf("%i",&cases);
 
-    init(&poly);
-
     do {
+        init(&poly);
+        
         scanf(" %[^\n]s",inputString);
         valid = tokenize(&poly, inputString);
 
