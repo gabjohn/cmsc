@@ -53,33 +53,35 @@ int deleteNode(list *l, int position) {
 }
 
 // frees or returns all the memory allocated to the list back to the free store or heap
-void freeList(list *l) {
-    free(l);
-}
+void freeList(list *l) { free(l); }
 
 // prints on the console the elements of the linked-list as a polynomial expression
 void display(list l) {
     node *tmp = l.head;
 
     while(tmp != NULL) {
-        printf("%i %i\n", tmp->item.coef, tmp->item.expo);
+        printf("%ix^%i", tmp->item.coef, tmp->item.expo);
         tmp = tmp->next;
+        if(tmp != NULL && tmp->item.coef > 0)
+            printf("+");
     }
+
+    printf("\n");
 }
 
 // checks for invalid input, returns 1 if input is invalid, 0 otherwise
 int inputChecking(char *str) {
     for(int i = 0; i < strlen(str); i++) {
-        if(((str[i] < '0' || str[i] > '9') && str[i] != 'x' && str[i] != '^' && str[i] != ' '
-            && str[i] != '+' && str[i] != '-') || ((str[i] == '+' && str[i + 1] == '-') 
-            || (str[i] == '+' && str[i + 1] == '-')) || (str[i] == '^' && str[i + 1] == '-'))
-                return 1;
+        if(((str[i] < '0' || str[i] > '9') && str[i] != 'x' && str[i] != '^' && str[i] != ' ' && str[i] != '+' && str[i] != '-')
+        || ((str[i] == '+' && str[i + 1] == '-') || (str[i] == '-' && str[i + 1] == '+')) || (str[i] == '^' && str[i + 1] == '-')
+        || str[strlen(str) - 1] == '-' || str[strlen(str) - 1] == '+')
+            return 1;
     }
     return 0;
 }
 
 // extracts the coeffiecient and the exponent of each term
-term extract(char *str) {
+term extract(char *str, int nega) {
     term t;
     char co[100], ex[100];
     int x = 0, i, j, flag = 0;
@@ -116,11 +118,14 @@ term extract(char *str) {
     if(t.expo == 0 && x && !flag)
         t.expo = 1;
 
+    if(nega)
+        t.coef *= -1;
+
     return t;
 }
 
 // tokenizes the string and getting each single term in an expression and appending the term to the list
-int tokenize(list *poly, char *inputString) {
+int tokenize(list *poly, char inputString[]) {
     // scan through the input string say "4x^2+8x+4"
     // if some characters in the string input to make invalid, return 0
     // else if valid and term substring was successfully extracted, append it to the linked-list  and return 1
@@ -130,29 +135,42 @@ int tokenize(list *poly, char *inputString) {
     // - extract the coefficient and exponent from the termstring 
     // - construct a term structure based on the values you extracted from the token termstring, and you may call it tempterm
     // - append this term in the linked-list by calling/invoking append(poly, term)
-    int inputError, i, j = 0;
-    char *termString;
-    char delim[3] = "+-";
+    int inputError, i, j = 0, nega = 0;
+    char *termString, *tmpString;
+    char *delim = "+-";
     term tmpTerm;
 
+    // checks input
     inputError = inputChecking(inputString);
 
     if(inputError)
         return 0;
     else {
-        tmpString[ = ]
+        tmpString = strdup(inputString);
+        if(inputString[0] == '-')
+            nega = 1;
+        // source https://www.tutorialspoint.com/c_standard_library/c_function_strtok.htm
         termString = strtok(inputString, delim);
 
         while(termString != NULL) {
             printf("%s\n", termString);
-            tmpTerm = extract(termString);
-            // source: https://stackoverflow.com/questions/12460264/c-determining-which-delimiter-used-strtok
-            // printf("%c\n", tmpString[termString-inputString+strlen(termString)]);
+            tmpTerm = extract(termString, nega);
+            nega = 0;
             append(poly, tmpTerm);
-            printf("%i | %i\n", tmpTerm.coef, tmpTerm.expo);
+
+            // source: https://stackoverflow.com/questions/12460264/c-determining-which-delimiter-used-strtok
+            // printf("%c\n", tmpString[termString - inputString + strlen(termString)]);
+            // printf("%s | %s | %i \n", termString, inputString, strlen(termString));
+            // printf("%p | %p | %i \n", termString, inputString, strlen(termString));
+            // printf("%i\n", termString - inputString + strlen(termString));
+            if(tmpString[termString - inputString + strlen(termString)] == '-')
+                nega = 1;
+            // printf("%i | %i\n", tmpTerm.coef, tmpTerm.expo);
 
             termString = strtok(NULL, delim);
         }
+
+        free(tmpString);
 
         return 1;
     }
