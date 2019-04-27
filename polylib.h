@@ -108,8 +108,30 @@ void display(list l) {
     node *tmp = l.head;
 
     while(tmp != NULL) {
-        printf("%i%c^%i", tmp->item.coef, VAR, tmp->item.expo);
+        if(tmp->item.expo > 0 && tmp->item.coef != 0) {
+            if(tmp->item.expo > 1) {
+                if(tmp->item.coef == 1)
+                    printf("%c^%i", VAR, tmp->item.expo);
+                else if(tmp->item.coef == -1)
+                    printf("-%c^%i", VAR, tmp->item.expo);
+                else if(tmp->item.coef != 0)
+                    printf("%i%c^%i", tmp->item.coef, VAR, tmp->item.expo);
+            }
+            else {
+                if(tmp->item.coef == 1)
+                    printf("%c", VAR);
+                else if(tmp->item.coef == -1)
+                    printf("-%c", VAR);
+                else if(tmp->item.coef != 0)
+                    printf("%i%c", tmp->item.coef, VAR);
+            }
+        }
+        else if(tmp->item.coef != 0)
+            printf("%i", tmp->item.coef);
+
+        // printf("%i%c^%i", tmp->item.coef, VAR, tmp->item.expo);
         tmp = tmp->next;
+
         if(tmp != NULL && tmp->item.coef > 0)
             printf("+");
     }
