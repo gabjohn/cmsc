@@ -52,12 +52,53 @@ int append(list *l, term t) {
 
 // deletes or removes the node found at the position represented by the second parameter
 // the first parameter should be found at position 1
-int deleteNode(list *l, int position) {
+int deleteNode(list *l, int p) {
+    int i = 1;
+    if(l->head == NULL || p < 1 || p > l->size)
+        return 0;
+    else {
+        node *tmp, *del;
 
+        if(l->size == 1)
+            l->head = l->tail = NULL;
+        else if(p == 1) {
+            del = l->head;
+            l->head = del->next;
+            del->next = NULL;
+            free(del);
+        } else if(p == l->size) {
+            tmp = l->tail->prev;
+
+            del = tmp->next;
+            tmp->next = NULL;
+            l->tail = tmp;
+            free(del);
+        } else {
+            tmp = l->head;
+
+            while(i < p - 1) {
+                tmp = tmp->next;
+                i++;
+            }
+
+            printf("here\n");
+
+            del = tmp->next;
+            tmp->next = del->next;
+            del->next = NULL;
+            free(del);
+        }
+
+        l->size--;
+
+        return 1;
+    }
 }
 
 // frees or returns all the memory allocated to the list back to the free store or heap
-void freeList(list *l) { free(l); }
+void freeList(list *l) {
+
+}
 
 // prints on the console the elements of the linked-list as a polynomial expression
 void display(list l) {
