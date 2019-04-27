@@ -2,6 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define CAP 100
+// change the value of VAR to change the uni-variable character
+#define VAR 'x'
+
 typedef struct {
     int coef, expo;
 }term;
@@ -60,7 +64,7 @@ void display(list l) {
     node *tmp = l.head;
 
     while(tmp != NULL) {
-        printf("%ix^%i", tmp->item.coef, tmp->item.expo);
+        printf("%i%c^%i", tmp->item.coef, VAR, tmp->item.expo);
         tmp = tmp->next;
         if(tmp != NULL && tmp->item.coef > 0)
             printf("+");
@@ -71,10 +75,21 @@ void display(list l) {
 
 // checks for invalid input, returns 1 if input is invalid, 0 otherwise
 int inputChecking(char *str) {
+    // invalid inputs:
+    // not a number (except x, ^, +, -)
+    // negative exponent (x^-2)
+    // operation followed with a carat (4x-^ or 4x+^)
+    // operation after operation (eg +-)
+    // variable after variable (xx)
+    // a carat followed by a non-number character (4x^x or 4x)
+    // variable followed by a number without the carat (4x4 or x6) (not sure if this is invalid)
+    // number carat number without the variable (4^4 or 6^1) (not sure if this is invalid)
     for(int i = 0; i < strlen(str); i++) {
-        if(((str[i] < '0' || str[i] > '9') && str[i] != 'x' && str[i] != '^' && str[i] != ' ' && str[i] != '+' && str[i] != '-')
+        if(((str[i] < '0' || str[i] > '9') && str[i] != VAR && str[i] != '^' && str[i] != ' ' && str[i] != '+' && str[i] != '-')
         || ((str[i] == '+' && str[i + 1] == '-') || (str[i] == '-' && str[i + 1] == '+')) || (str[i] == '^' && str[i + 1] == '-')
-        || str[strlen(str) - 1] == '-' || str[strlen(str) - 1] == '+')
+        || ((str[i] == '-' || str[i] == '+') && str[i + 1] == '^') || str[strlen(str) - 1] == '-' || str[strlen(str) - 1] == '+'
+        || (str[i] == VAR && str[i + 1] == VAR) || (str[i] == '^' && (str[i + 1] < '0' || str[i + 1] > '9'))
+        || (str[i] == VAR && (str[i + 1] >= '0' && str[i + 1] <= '0')) || (str[i] == '^' && str[i - 1] != VAR))
             return 1;
     }
     return 0;
@@ -83,11 +98,11 @@ int inputChecking(char *str) {
 // extracts the coeffiecient and the exponent of each term
 term extract(char *str, int nega) {
     term t;
-    char co[100], ex[100];
+    char co[CAP], ex[CAP];
     int x = 0, i, j, flag = 0;
     
     for(i = 0, j = 0; i < strlen(str); i++) {
-        if(str[i] == 'x') {
+        if(str[i] == VAR) {
             x = i + 1;
             co[i] = '\0';
             i++;
@@ -135,10 +150,10 @@ int tokenize(list *poly, char inputString[]) {
     // - extract the coefficient and exponent from the termstring 
     // - construct a term structure based on the values you extracted from the token termstring, and you may call it tempterm
     // - append this term in the linked-list by calling/invoking append(poly, term)
-    int inputError, i, j = 0, nega = 0;
-    char *termString, *tmpString;
-    char *delim = "+-";
-    term tmpTerm;
+    int inputError, i = 0, j = 0, nega = 0;
+    char termString[CAP];
+    // char *termString, *tmpString;
+    // char *delim = "+-";
 
     // checks input
     inputError = inputChecking(inputString);
@@ -146,7 +161,32 @@ int tokenize(list *poly, char inputString[]) {
     if(inputError)
         return 0;
     else {
+        // checks if the first term has a negative coefficient
+        if(inputString[0] == '-') {
+            nega = 1;
+            i = 1;
+        }
+        for(; i < strlen(inputString); i++) {
+            // creates a substring of each single term
+            if(inputString[i] != '+' && inputString[i] != '-') {
+                termString[j] = inputString[i];
+                j++;
+            }
+            // the i == strlen(inputString) - 1 is there so that the last term that has no - or + after it will still be appended
+            if(inputString[i] == '+' || inputString[i] == '-' || i == strlen(inputString) - 1) {
+                termString[j] = '\0';
+                // appends the term into the linked-list after extracting the coefficient and the exponent of the term using extract()
+                append(poly, extract(termString, nega));
+                // checks if the operation after the term is minus indicating a negative coefficient for the next term
+                nega = (inputString[i] == '-') ? 1 : 0;
+                j = 0;
+            }
+        }
+
+        /*
+        another way of tokenizing the input by using strtok
         tmpString = strdup(inputString);
+
         if(inputString[0] == '-')
             nega = 1;
         // source https://www.tutorialspoint.com/c_standard_library/c_function_strtok.htm
@@ -154,23 +194,24 @@ int tokenize(list *poly, char inputString[]) {
 
         while(termString != NULL) {
             printf("%s\n", termString);
-            tmpTerm = extract(termString, nega);
+            append(poly, extract(termString, nega));
             nega = 0;
-            append(poly, tmpTerm);
 
             // source: https://stackoverflow.com/questions/12460264/c-determining-which-delimiter-used-strtok
             // printf("%c\n", tmpString[termString - inputString + strlen(termString)]);
             // printf("%s | %s | %i \n", termString, inputString, strlen(termString));
             // printf("%p | %p | %i \n", termString, inputString, strlen(termString));
             // printf("%i\n", termString - inputString + strlen(termString));
+            
+            // gets the delimeter that separated the token
             if(tmpString[termString - inputString + strlen(termString)] == '-')
                 nega = 1;
-            // printf("%i | %i\n", tmpTerm.coef, tmpTerm.expo);
 
             termString = strtok(NULL, delim);
         }
 
         free(tmpString);
+        */
 
         return 1;
     }
