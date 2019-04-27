@@ -54,6 +54,7 @@ int append(list *l, term t) {
 // the first parameter should be found at position 1
 int deleteNode(list *l, int p) {
     int i = 1;
+
     if(l->head == NULL || p < 1 || p > l->size)
         return 0;
     else {
@@ -66,14 +67,16 @@ int deleteNode(list *l, int p) {
             l->head = del->next;
             del->next = NULL;
             free(del);
-        } else if(p == l->size) {
+        }
+        else if(p == l->size) {
             tmp = l->tail->prev;
 
             del = tmp->next;
             tmp->next = NULL;
             l->tail = tmp;
             free(del);
-        } else {
+        }
+        else {
             tmp = l->head;
 
             while(i < p - 1) {
