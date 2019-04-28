@@ -83,8 +83,6 @@ int deleteNode(list *l, int p) {
                     i++;
                 }
 
-                printf("here\n");
-
                 del = tmp->next;
                 tmp->next = del->next;
                 del->next = NULL;
@@ -101,7 +99,7 @@ int deleteNode(list *l, int p) {
 
 // frees or returns all the memory allocated to the list back to the free store or heap
 void freeList(list *l) {
-
+    
 }
 
 // prints on the console the elements of the linked-list as a polynomial expression
@@ -148,7 +146,7 @@ int inputChecking(char *str) {
     // operation followed with a carat (4x-^ or 4x+^)
     // operation after operation (eg +-)
     // variable after variable (xx)
-    // a carat followed by a non-number character (4x^x or 4x)
+    // a carat followed by a non-number character (4x^x or 4x^^)
     // variable followed by a number without the carat (4x4 or x6) (not sure if this is invalid)
     // number carat number without the variable (4^4 or 6^1) (not sure if this is invalid)
     for(int i = 0; i < strlen(str); i++) {
