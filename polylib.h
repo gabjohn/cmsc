@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define CAP 100
+#define ARR 100
 // change the value of VAR to change the uni-variable character
 #define VAR 'x'
 
@@ -62,33 +62,34 @@ int deleteNode(list *l, int p) {
 
         if(l->size == 1)
             l->head = l->tail = NULL;
-        else if(p == 1) {
-            del = l->head;
-            l->head = del->next;
-            del->next = NULL;
-            free(del);
-        }
-        else if(p == l->size) {
-            tmp = l->tail->prev;
-
-            del = tmp->next;
-            tmp->next = NULL;
-            l->tail = tmp;
-            free(del);
-        }
         else {
-            tmp = l->head;
+            if(p == 1) {
+                del = l->head;
+                l->head = del->next;
+                del->next = NULL;
+            }
+            else if(p == l->size) {
+                tmp = l->tail->prev;
 
-            while(i < p - 1) {
-                tmp = tmp->next;
-                i++;
+                del = tmp->next;
+                tmp->next = NULL;
+                l->tail = tmp;
+            }
+            else {
+                tmp = l->head;
+
+                while(i < p - 1) {
+                    tmp = tmp->next;
+                    i++;
+                }
+
+                printf("here\n");
+
+                del = tmp->next;
+                tmp->next = del->next;
+                del->next = NULL;
             }
 
-            printf("here\n");
-
-            del = tmp->next;
-            tmp->next = del->next;
-            del->next = NULL;
             free(del);
         }
 
@@ -164,7 +165,7 @@ int inputChecking(char *str) {
 // extracts the coeffiecient and the exponent of each term
 term extract(char *str, int nega) {
     term t;
-    char co[CAP], ex[CAP];
+    char co[ARR], ex[ARR];
     int x = 0, i, j, flag = 0;
     
     for(i = 0, j = 0; i < strlen(str); i++) {
@@ -217,7 +218,7 @@ int tokenize(list *poly, char inputString[]) {
     // - construct a term structure based on the values you extracted from the token termstring, and you may call it tempterm
     // - append this term in the linked-list by calling/invoking append(poly, term)
     int inputError, i = 0, j = 0, nega = 0;
-    char termString[CAP];
+    char termString[ARR];
     // char *termString, *tmpString;
     // char *delim = "+-";
 
@@ -280,5 +281,25 @@ int tokenize(list *poly, char inputString[]) {
         */
 
         return 1;
+    }
+}
+
+void sortTerms(list *l) {
+    node *curr = l->head;
+
+    while(curr != NULL) {
+        node *other = curr->next;
+
+        while(other != NULL) {
+            if(curr->item.expo < other->item.expo) {
+                term t = curr->item;
+                curr->item = other->item;
+                other->item = t;
+            }
+
+            other = other->next;
+        }
+
+        curr = curr->next;
     }
 }
