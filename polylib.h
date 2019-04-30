@@ -195,44 +195,6 @@ int inputChecking(char *str) {
     return 0;
 }
 
-// int inputChecking(char *str) {
-//     // invalid inputs:
-//     // not a number (except x, ^, +, -)
-//     // negative exponent (x^-2)
-//     // operation followed with a carat (4x-^ or 4x+^)
-//     // operation after operation (eg +-)
-//     // variable after variable (xx)
-//     // a carat followed by a non-number character (4x^x or 4x^^)
-//     // variable followed by a number without the carat (4x4 or x6) (not sure if this is invalid)
-//     // number carat number without the variable (4^4 or 6^1) (not sure if this is invalid)
-//     for(int i = 0; i < strlen(str); i++) {
-//         char next;
-
-//         if(str[i + 1] == ' ') {
-//             next = nextChar(str, i+1);
-//             if ((str[i] >= '0' && str[i] <= '9') && (next >= '0' && next <= '9')
-//             || (str[i] == '^' && (next < '0' || next > '9'))
-//             || (str[i] == 'x' && (next != '^' || next != '+' || next != '-')))
-//                 return 1;
-//         }
-        
-//         if(((str[i] < '0' || str[i] > '9') && str[i] != 'x' && str[i] != '^' && str[i] != ' ' && str[i] != '+' && str[i] != '-')
-//         || ((str[i] == '+' && str[i + 1] == '-') 
-//         || ((str[i] == '+' && str[i + 1] == '+') 
-//         || (str[i] == '-' && str[i + 1] == '+')) 
-//         || (str[i] == '-' && str[i + 1] == '-')) 
-//         || (str[i] == '^' && str[i + 1] == '-')
-//         || ((str[i] == '-' || str[i] == '+') && str[i + 1] == '^') 
-//         || str[strlen(str) - 1] == '-' 
-//         || str[strlen(str) - 1] == '+'
-//         || (str[i] == '^' && (next < '0' || next > '9'))
-//         || (str[i] == 'x' && str[i + 1] == 'x') 
-//         || (str[i] == 'x' && (str[i + 1] >= '0' && str[i + 1] <= '0')))
-//             return 1;
-//     }
-//     return 0;
-// }
-
 void sortTerms(list *l) {
     node *curr = l->head;
 
