@@ -205,10 +205,13 @@ int tokenize(list *poly, char inputString[]) {
     int neg = 0, termStart = 0, var = 0, tens = 0, coefConverted = 0,
         expoConverted = 0, len = strlen(inputString);
     term t;
+
+    // Checks for invalid inputs
     if (inputChecking(inputString)) {
         return 0;
     } else {
         for (int i = 0; i < len; i++) {
+            // Initializes variables at the start and at new terms
             if (inputString[i] == '-' || inputString[i] == '+' || i == 0) {
                 termStart = 1;
                 tens = 1;
@@ -218,40 +221,60 @@ int tokenize(list *poly, char inputString[]) {
                 neg = 0;
                 coefConverted = 0;
                 expoConverted = 0;
+
+                // Handles if the term is negative
                 if (inputString[i] == '-') {
                     neg = 1;
                 }
-                if (i != 0) {
-                    i++;
-                }
             }
             if (termStart) {
+                // Checks if the variable has been reached and resets certain
+                // variables
                 if (inputString[i] == 'x') {
                     var = 1;
                     tens = 1;
-                    if (inputString[i+1] != '^') {
+
+                    // checks if the term has an exponent, if it does not, sets
+                    // it to 1
+                    if (inputString[i + 1] != '^') {
                         expoConverted = 1;
-                        t.expo = 1;
                     }
                 }
+
+                // Converts the coefficients but it first checks if it is a
+                // number to catch spaces in the input
                 if (!var && inputString[i] >= '0' && inputString[i] <= '9') {
                     coefConverted = 1;
                     t.coef *= 10;
                     t.coef += (inputString[i] - '0');
                 }
+
+                // Converts the exponent but it first checks if it is a number
+                // to catch spaces in the input
                 if (!expoConverted && var && inputString[i] >= '0' &&
                     inputString[i] <= '9') {
                     t.expo *= 10;
                     t.expo += (inputString[i] - '0');
                 }
+
+                // If the next input is a plus or minus or the end of the string
+                // then it means that the tem has already ended. This cleans up
+                // the coeffecient and exponents, to handle edge cases
                 if (inputString[i + 1] == '+' || inputString[i + 1] == '-' ||
                     i + 1 == len) {
                     termStart = 0;
 
+                    //This means that the coefficent was not found but x was
                     if (coefConverted != 1) {
                         t.coef = 1;
                     }
 
+                    //This means that x was found but the exponent was not
+                    if (expoConverted) {
+                        t.expo = 1;
+                    }
+
+                    //Converts the coefficient to negative depending on the sign used
                     if (neg) {
                         t.coef *= -1;
                     }
