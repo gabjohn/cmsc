@@ -113,6 +113,7 @@ void display(list l) {
     int zeroFlag = 1;
     while (tmp != NULL) {
         if (tmp->item.expo > 0 && tmp->item.coef != 0) {
+            zeroFlag = 0;
             if (tmp->item.expo > 1) {
                 if (tmp->item.coef == 1)
                     printf("x^%i", tmp->item.expo);
@@ -128,8 +129,10 @@ void display(list l) {
                 else if (tmp->item.coef != 0)
                     printf("%ix", tmp->item.coef);
             }
-        } else if (tmp->item.expo == 0 && tmp->item.coef != 0)
+        } else if (tmp->item.expo == 0 && tmp->item.coef != 0){
+            zeroFlag = 0;
             printf("%i", tmp->item.coef);
+        }
 
         // printf("%i%c^%i", tmp->item.coef, VAR, tmp->item.expo);
         if(tmp->item.coef != 0 && tmp->item.expo == 0){
@@ -137,7 +140,7 @@ void display(list l) {
         }
         tmp = tmp->next;
 
-        if (tmp != NULL && tmp->item.expo == 0 && tmp->item.coef != 0) printf("+");
+        if (tmp != NULL && !(tmp->prev->item.coef == 0 && tmp->prev->item.expo == 0)) printf("+");
     }
 
     if(zeroFlag){
