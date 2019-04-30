@@ -250,7 +250,8 @@ int tokenize(list *poly, char inputString[]) {
 
                     // checks if the term has an exponent, if it does not, sets
                     // it to 1
-                    if (inputString[i + 1] != '^') {
+                    char next = nextChar(inputString, i+1);
+                    if (next != '^') {
                         expoConverted = 1;
                     }
                 }
