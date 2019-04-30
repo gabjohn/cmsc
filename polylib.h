@@ -68,11 +68,9 @@ int deleteNode(list *l, int p) {
                 l->head->prev = NULL;
                 del->next = NULL;
             } else if (p == l->size) {
-                tmp = l->tail->prev;
-
-                del = tmp->next;
+                del = l->tail;
+                tmp = del->prev;
                 del->prev = NULL;
-
                 tmp->next = NULL;
                 l->tail = tmp;
             } else {
@@ -85,7 +83,7 @@ int deleteNode(list *l, int p) {
 
                 del = tmp->next;
                 tmp->next = del->next;
-                del->next->prev = tmp;
+                tmp->next->prev = tmp;
                 del->next = NULL;
                 del->prev = NULL;
             }
@@ -128,7 +126,7 @@ void display(list l) {
                 else if (tmp->item.coef != 0)
                     printf("%ix", tmp->item.coef);
             }
-        } else if (tmp->item.coef != 0)
+        } else
             printf("%i", tmp->item.coef);
 
         // printf("%i%c^%i", tmp->item.coef, VAR, tmp->item.expo);
@@ -264,17 +262,18 @@ int tokenize(list *poly, char inputString[]) {
                     i + 1 == len) {
                     termStart = 0;
 
-                    //This means that the coefficent was not found but x was
+                    // This means that the coefficent was not found but x was
                     if (coefConverted != 1) {
                         t.coef = 1;
                     }
 
-                    //This means that x was found but the exponent was not
+                    // This means that x was found but the exponent was not
                     if (expoConverted) {
                         t.expo = 1;
                     }
 
-                    //Converts the coefficient to negative depending on the sign used
+                    // Converts the coefficient to negative depending on the
+                    // sign used
                     if (neg) {
                         t.coef *= -1;
                     }
