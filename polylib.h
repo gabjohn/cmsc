@@ -4,6 +4,8 @@
 
 #define ARR 100
 
+// #define VAR 'x'
+
 typedef struct {
     int coef, expo;
 } term;
@@ -138,6 +140,14 @@ void display(list l) {
     printf("\n");
 }
 
+char nextChar(char str[], int pos) {
+    while(pos < strlen(str)) {
+        if(str[pos] != ' ')
+            return str[pos];
+        pos++;
+    }
+}
+
 // checks for invalid input, returns 1 if input is invalid, 0 otherwise
 int inputChecking(char *str) {
     // invalid inputs:
@@ -147,21 +157,27 @@ int inputChecking(char *str) {
     // operation after operation (eg +-)
     // variable after variable (xx)
     // a carat followed by a non-number character (4x^x or 4x^^)
-    // variable followed by a number without the carat (4x4 or x6) (not sure if
-    // this is invalid) number carat number without the variable (4^4 or 6^1)
-    // (not sure if this is invalid)
-    for (int i = 0; i < strlen(str); i++) {
-        if (((str[i] < '0' || str[i] > '9') && str[i] != 'x' && str[i] != '^' &&
-             str[i] != ' ' && str[i] != '+' && str[i] != '-') ||
-            ((str[i] == '+' && str[i + 1] == '-') ||
-             (str[i] == '-' && str[i + 1] == '+')) ||
-            (str[i] == '^' && str[i + 1] == '-') ||
-            ((str[i] == '-' || str[i] == '+') && str[i + 1] == '^') ||
-            str[strlen(str) - 1] == '-' || str[strlen(str) - 1] == '+' ||
-            (str[i] == 'x' && str[i + 1] == 'x') ||
-            (str[i] == '^' && (str[i + 1] < '0' || str[i + 1] > '9')) ||
-            (str[i] == 'x' && (str[i + 1] >= '0' && str[i + 1] <= '0')) ||
-            (str[i] == '^' && str[i - 1] != 'x'))
+    // variable followed by a number without the carat (4x4 or x6) (not sure if this is invalid)
+    // number carat number without the variable (4^4 or 6^1) (not sure if this is invalid)
+    for(int i = 0; i < strlen(str); i++) {
+        char next;
+
+        if(str[i + 1] == ' ') {
+            next = nextChar(str, i+1);
+            if ((str[i] >= '0' && str[i] <= '9') && (next >= '0' && next <= '9')
+            || (str[i] == '^' && (next < '0' || next > '9')))
+                return 1;
+        }
+        
+        if(((str[i] < '0' || str[i] > '9') && str[i] != 'x' && str[i] != '^' && str[i] != ' ' && str[i] != '+' && str[i] != '-')
+        || ((str[i] == '+' && str[i + 1] == '-') 
+        || (str[i] == '-' && str[i + 1] == '+')) 
+        || (str[i] == '^' && str[i + 1] == '-')
+        || ((str[i] == '-' || str[i] == '+') && str[i + 1] == '^') 
+        || str[strlen(str) - 1] == '-' 
+        || str[strlen(str) - 1] == '+'
+        || (str[i] == 'x' && str[i + 1] == 'x') 
+        || (str[i] == 'x' && (str[i + 1] >= '0' && str[i + 1] <= '0')))
             return 1;
     }
     return 0;

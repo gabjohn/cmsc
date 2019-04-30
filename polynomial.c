@@ -13,7 +13,8 @@ int main() {
         
         scanf(" %[^\n]s",inputString);
         valid = tokenize(&poly, inputString);
-        // sortTerms(&poly);
+        sortTerms(&poly);
+
         if(valid)
             display(poly);
         else 
