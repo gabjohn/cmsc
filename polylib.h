@@ -6,19 +6,19 @@
 
 typedef struct {
     int coef, expo;
-}term;
+} term;
 
 typedef struct element {
     term item;
     struct element *next, *prev;
-}node;
+} node;
 
 typedef struct {
     int size;
     node *head, *tail;
-}list;
+} list;
 
-//initializes the head and tail to NULL and the size to zero
+// initializes the head and tail to NULL and the size to zero
 void init(list *l) {
     l->size = 0;
     l->head = l->tail = NULL;
@@ -28,18 +28,18 @@ void init(list *l) {
 int append(list *l, term t) {
     node *n = malloc(sizeof(node));
 
-    if(n == NULL)
+    if (n == NULL)
         return 0;
     else {
         n->item = t;
         n->prev = l->tail;
         n->next = NULL;
 
-        if(l->head == NULL)
+        if (l->head == NULL)
             l->head = l->tail = n;
         else {
-           l->tail->next = n;
-           l->tail = n;
+            l->tail->next = n;
+            l->tail = n;
         }
 
         l->size++;
@@ -48,46 +48,49 @@ int append(list *l, term t) {
     }
 }
 
-// deletes or removes the node found at the position represented by the second parameter
-// the first parameter should be found at position 1
+// deletes or removes the node found at the position represented by the second
+// parameter the first parameter should be found at position 1
 int deleteNode(list *l, int p) {
     int i = 1;
 
-    if(l->head == NULL || p < 1 || p > l->size)
+    if (l->head == NULL || p < 1 || p > l->size)
         return 0;
     else {
         node *tmp, *del;
 
-        if(l->size == 1)
+        if (l->size == 1) {
+            del = l->head;
             l->head = l->tail = NULL;
-        else {
-            if(p == 1) {
+        } else {
+            if (p == 1) {
                 del = l->head;
                 l->head = del->next;
+                l->head->prev = NULL;
                 del->next = NULL;
-            }
-            else if(p == l->size) {
+            } else if (p == l->size) {
                 tmp = l->tail->prev;
 
                 del = tmp->next;
+                del->prev = NULL;
+
                 tmp->next = NULL;
                 l->tail = tmp;
-            }
-            else {
+            } else {
                 tmp = l->head;
 
-                while(i < p - 1) {
+                while (i < p - 1) {
                     tmp = tmp->next;
                     i++;
                 }
 
                 del = tmp->next;
                 tmp->next = del->next;
+                del->next->prev = tmp;
                 del->next = NULL;
+                del->prev = NULL;
             }
-
-            free(del);
         }
+        free(del);
 
         l->size--;
 
@@ -95,42 +98,43 @@ int deleteNode(list *l, int p) {
     }
 }
 
-// frees or returns all the memory allocated to the list back to the free store or heap
+// frees or returns all the memory allocated to the list back to the free store
+// or heap
 void freeList(list *l) {
-    
+    while (l->size != 0) {
+        deleteNode(l, 1);
+    }
 }
 
-// prints on the console the elements of the linked-list as a polynomial expression
+// prints on the console the elements of the linked-list as a polynomial
+// expression
 void display(list l) {
     node *tmp = l.head;
 
-    while(tmp != NULL) {
-        if(tmp->item.expo > 0 && tmp->item.coef != 0) {
-            if(tmp->item.expo > 1) {
-                if(tmp->item.coef == 1)
+    while (tmp != NULL) {
+        if (tmp->item.expo > 0 && tmp->item.coef != 0) {
+            if (tmp->item.expo > 1) {
+                if (tmp->item.coef == 1)
                     printf("x^%i", tmp->item.expo);
-                else if(tmp->item.coef == -1)
+                else if (tmp->item.coef == -1)
                     printf("-x^%i", tmp->item.expo);
-                else if(tmp->item.coef != 0)
-                    printf("%i^%i", tmp->item.coef, tmp->item.expo);
-            }
-            else {
-                if(tmp->item.coef == 1)
+                else if (tmp->item.coef != 0)
+                    printf("%ix^%i", tmp->item.coef, tmp->item.expo);
+            } else {
+                if (tmp->item.coef == 1)
                     printf("x");
-                else if(tmp->item.coef == -1)
+                else if (tmp->item.coef == -1)
                     printf("-x");
-                else if(tmp->item.coef != 0)
+                else if (tmp->item.coef != 0)
                     printf("%ix", tmp->item.coef);
             }
-        }
-        else if(tmp->item.coef != 0)
+        } else if (tmp->item.coef != 0)
             printf("%i", tmp->item.coef);
 
         // printf("%i%c^%i", tmp->item.coef, VAR, tmp->item.expo);
         tmp = tmp->next;
 
-        if(tmp != NULL && tmp->item.coef > 0)
-            printf("+");
+        if (tmp != NULL && tmp->item.coef > 0) printf("+");
     }
 
     printf("\n");
@@ -145,71 +149,34 @@ int inputChecking(char *str) {
     // operation after operation (eg +-)
     // variable after variable (xx)
     // a carat followed by a non-number character (4x^x or 4x^^)
-    // variable followed by a number without the carat (4x4 or x6) (not sure if this is invalid)
-    // number carat number without the variable (4^4 or 6^1) (not sure if this is invalid)
-    for(int i = 0; i < strlen(str); i++) {
-        if(((str[i] < '0' || str[i] > '9') && str[i] != 'x' && str[i] != '^' && str[i] != ' ' && str[i] != '+' && str[i] != '-')
-        || ((str[i] == '+' && str[i + 1] == '-') || (str[i] == '-' && str[i + 1] == '+')) || (str[i] == '^' && str[i + 1] == '-')
-        || ((str[i] == '-' || str[i] == '+') && str[i + 1] == '^') || str[strlen(str) - 1] == '-' || str[strlen(str) - 1] == '+'
-        || (str[i] == 'x' && str[i + 1] == 'x') || (str[i] == '^' && (str[i + 1] < '0' || str[i + 1] > '9'))
-        || (str[i] == 'x' && (str[i + 1] >= '0' && str[i + 1] <= '0')) || (str[i] == '^' && str[i - 1] != 'x'))
+    // variable followed by a number without the carat (4x4 or x6) (not sure if
+    // this is invalid) number carat number without the variable (4^4 or 6^1)
+    // (not sure if this is invalid)
+    for (int i = 0; i < strlen(str); i++) {
+        if (((str[i] < '0' || str[i] > '9') && str[i] != 'x' && str[i] != '^' &&
+             str[i] != ' ' && str[i] != '+' && str[i] != '-') ||
+            ((str[i] == '+' && str[i + 1] == '-') ||
+             (str[i] == '-' && str[i + 1] == '+')) ||
+            (str[i] == '^' && str[i + 1] == '-') ||
+            ((str[i] == '-' || str[i] == '+') && str[i + 1] == '^') ||
+            str[strlen(str) - 1] == '-' || str[strlen(str) - 1] == '+' ||
+            (str[i] == 'x' && str[i + 1] == 'x') ||
+            (str[i] == '^' && (str[i + 1] < '0' || str[i + 1] > '9')) ||
+            (str[i] == 'x' && (str[i + 1] >= '0' && str[i + 1] <= '0')) ||
+            (str[i] == '^' && str[i - 1] != 'x'))
             return 1;
     }
     return 0;
 }
 
-// extracts the coeffiecient and the exponent of each term
-term extract(char *str, int nega) {
-    term t;
-    char co[ARR], ex[ARR];
-    int varFound = 0, i, j, caratFound = 0;
-    
-    for(i = 0, j = 0; i < strlen(str); i++) {
-        if(str[i] == VAR) {
-            varFound = i + 1;
-            co[i] = '\0';
-            i++;
-        }
-
-        if(!varFound)
-            co[i] = str[i];
-        else {
-            if(str[i] == '^')
-                caratFound++;
-            else {
-                ex[j] = str[i];
-                j++;
-            }
-        }
-    }
-    ex[j] = '\0';
-
-    // array of characters to int
-    t.coef = atoi(co);
-    t.expo = atoi(ex);
-    
-    // case varFound, coeffiecient is 1
-    if(t.coef == 0 && varFound == 1)
-        t.coef = 1;
-    
-    // case varFound, exponent is 1
-    if(t.expo == 0 && varFound && !caratFound)
-        t.expo = 1;
-
-    if(nega)
-        t.coef *= -1;
-
-    return t;
-}
-
 void sortTerms(list *l) {
     node *curr = l->head;
 
-    while(curr != NULL) {
+    while (curr != NULL) {
         node *other = curr->next;
 
-        while(other != NULL) {
-            if(curr->item.expo < other->item.expo) {
+        while (other != NULL) {
+            if (curr->item.expo < other->item.expo) {
                 term t = curr->item;
                 curr->item = other->item;
                 other->item = t;
@@ -222,79 +189,76 @@ void sortTerms(list *l) {
     }
 }
 
-// tokenizes the string and getting each single term in an expression and appending the term to the list
+// scan through the input string say "4x^2+8x+4"
+// if some characters in the string input to make invalid, return 0
+// else if valid and term substring was successfully extracted, append it to
+// the linked-list  and return 1 this else part will involve a number of
+// tasks (assume you keep a substring called termstring to store a term
+// substring from the input string)
+// - successfully extract "4x^2" and store it in termstring
+// - extract the coefficient and exponent from the termstring
+// - construct a term structure based on the values you extracted from the
+// token termstring, and you may call it tempterm
+// - append this term in the linked-list by calling/invoking append(poly,
+// term
 int tokenize(list *poly, char inputString[]) {
-    // scan through the input string say "4x^2+8x+4"
-    // if some characters in the string input to make invalid, return 0
-    // else if valid and term substring was successfully extracted, append it to the linked-list  and return 1
-    // this else part will involve a number of tasks (assume you keep a substring called termstring
-    // to store a term substring from the input string)
-    // - successfully extract "4x^2" and store it in termstring
-    // - extract the coefficient and exponent from the termstring 
-    // - construct a term structure based on the values you extracted from the token termstring, and you may call it tempterm
-    // - append this term in the linked-list by calling/invoking append(poly, term)
-    int inputError, i = 0, j = 0, nega = 0;
-    char termString[ARR];
-    // char *termString, *tmpString;
-    // char *delim = "+-";
-
-    // checks input
-    inputError = inputChecking(inputString);
-
-    if(inputError)
+    int neg = 0, termStart = 0, var = 0, tens = 0, coefConverted = 0,
+        expoConverted = 0, len = strlen(inputString);
+    term t;
+    if (inputChecking(inputString)) {
         return 0;
-    else {
-        // checks if the first term has a negative coefficient
-        if(inputString[0] == '-') {
-            nega = 1;
-            i = 1;
-        }
-        for(; i < strlen(inputString); i++) {
-            // creates a substring of each single term
-            if(inputString[i] != '+' && inputString[i] != '-') {
-                termString[j] = inputString[i];
-                j++;
+    } else {
+        for (int i = 0; i < len; i++) {
+            if (inputString[i] == '-' || inputString[i] == '+' || i == 0) {
+                termStart = 1;
+                tens = 1;
+                var = 0;
+                t.coef = 0;
+                t.expo = 0;
+                neg = 0;
+                coefConverted = 0;
+                expoConverted = 0;
+                if (inputString[i] == '-') {
+                    neg = 1;
+                }
+                if (i != 0) {
+                    i++;
+                }
             }
-            // the i == strlen(inputString) - 1 is there so that the last term that has no - or + after it will still be appended
-            if(inputString[i] == '+' || inputString[i] == '-' || i == strlen(inputString) - 1) {
-                termString[j] = '\0';
-                // appends the term into the linked-list after extracting the coefficient and the exponent of the term using extract()
-                append(poly, extract(termString, nega));
-                // checks if the operation after the term is minus indicating a negative coefficient for the next term
-                nega = (inputString[i] == '-') ? 1 : 0;
-                j = 0;
+            if (termStart) {
+                if (inputString[i] == 'x') {
+                    var = 1;
+                    tens = 1;
+                    if (inputString[i+1] != '^') {
+                        expoConverted = 1;
+                        t.expo = 1;
+                    }
+                }
+                if (!var && inputString[i] >= '0' && inputString[i] <= '9') {
+                    coefConverted = 1;
+                    t.coef *= 10;
+                    t.coef += (inputString[i] - '0');
+                }
+                if (!expoConverted && var && inputString[i] >= '0' &&
+                    inputString[i] <= '9') {
+                    t.expo *= 10;
+                    t.expo += (inputString[i] - '0');
+                }
+                if (inputString[i + 1] == '+' || inputString[i + 1] == '-' ||
+                    i + 1 == len) {
+                    termStart = 0;
+
+                    if (coefConverted != 1) {
+                        t.coef = 1;
+                    }
+
+                    if (neg) {
+                        t.coef *= -1;
+                    }
+                    append(poly, t);
+                }
             }
         }
-
-        /*
-        another way of tokenizing the input by using strtok
-        tmpString = strdup(inputString);
-
-        if(inputString[0] == '-')
-            nega = 1;
-        // source https://www.tutorialspoint.com/c_standard_library/c_function_strtok.htm
-        termString = strtok(inputString, delim);
-
-        while(termString != NULL) {
-            printf("%s\n", termString);
-            append(poly, extract(termString, nega));
-            nega = 0;
-
-            // source: https://stackoverflow.com/questions/12460264/c-determining-which-delimiter-used-strtok
-            // printf("%c\n", tmpString[termString - inputString + strlen(termString)]);
-            // printf("%s | %s | %i \n", termString, inputString, strlen(termString));
-            // printf("%p | %p | %i \n", termString, inputString, strlen(termString));
-            // printf("%i\n", termString - inputString + strlen(termString));
-            
-            // gets the delimeter that separated the token
-            if(tmpString[termString - inputString + strlen(termString)] == '-')
-                nega = 1;
-
-            termString = strtok(NULL, delim);
-        }
-
-        free(tmpString);
-        */
 
         return 1;
     }
