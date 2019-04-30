@@ -3,8 +3,6 @@
 #include <string.h>
 
 #define ARR 100
-// change the value of VAR to change the uni-variable character
-#define VAR 'x'
 
 typedef struct {
     int coef, expo;
@@ -110,19 +108,19 @@ void display(list l) {
         if(tmp->item.expo > 0 && tmp->item.coef != 0) {
             if(tmp->item.expo > 1) {
                 if(tmp->item.coef == 1)
-                    printf("%c^%i", VAR, tmp->item.expo);
+                    printf("x^%i", tmp->item.expo);
                 else if(tmp->item.coef == -1)
-                    printf("-%c^%i", VAR, tmp->item.expo);
+                    printf("-x^%i", tmp->item.expo);
                 else if(tmp->item.coef != 0)
-                    printf("%i%c^%i", tmp->item.coef, VAR, tmp->item.expo);
+                    printf("%i^%i", tmp->item.coef, tmp->item.expo);
             }
             else {
                 if(tmp->item.coef == 1)
-                    printf("%c", VAR);
+                    printf("x");
                 else if(tmp->item.coef == -1)
-                    printf("-%c", VAR);
+                    printf("-x");
                 else if(tmp->item.coef != 0)
-                    printf("%i%c", tmp->item.coef, VAR);
+                    printf("%ix", tmp->item.coef);
             }
         }
         else if(tmp->item.coef != 0)
@@ -150,11 +148,11 @@ int inputChecking(char *str) {
     // variable followed by a number without the carat (4x4 or x6) (not sure if this is invalid)
     // number carat number without the variable (4^4 or 6^1) (not sure if this is invalid)
     for(int i = 0; i < strlen(str); i++) {
-        if(((str[i] < '0' || str[i] > '9') && str[i] != VAR && str[i] != '^' && str[i] != ' ' && str[i] != '+' && str[i] != '-')
+        if(((str[i] < '0' || str[i] > '9') && str[i] != 'x' && str[i] != '^' && str[i] != ' ' && str[i] != '+' && str[i] != '-')
         || ((str[i] == '+' && str[i + 1] == '-') || (str[i] == '-' && str[i + 1] == '+')) || (str[i] == '^' && str[i + 1] == '-')
         || ((str[i] == '-' || str[i] == '+') && str[i + 1] == '^') || str[strlen(str) - 1] == '-' || str[strlen(str) - 1] == '+'
-        || (str[i] == VAR && str[i + 1] == VAR) || (str[i] == '^' && (str[i + 1] < '0' || str[i + 1] > '9'))
-        || (str[i] == VAR && (str[i + 1] >= '0' && str[i + 1] <= '0')) || (str[i] == '^' && str[i - 1] != VAR))
+        || (str[i] == 'x' && str[i + 1] == 'x') || (str[i] == '^' && (str[i + 1] < '0' || str[i + 1] > '9'))
+        || (str[i] == 'x' && (str[i + 1] >= '0' && str[i + 1] <= '0')) || (str[i] == '^' && str[i - 1] != 'x'))
             return 1;
     }
     return 0;
@@ -164,20 +162,20 @@ int inputChecking(char *str) {
 term extract(char *str, int nega) {
     term t;
     char co[ARR], ex[ARR];
-    int x = 0, i, j, flag = 0;
+    int varFound = 0, i, j, caratFound = 0;
     
     for(i = 0, j = 0; i < strlen(str); i++) {
         if(str[i] == VAR) {
-            x = i + 1;
+            varFound = i + 1;
             co[i] = '\0';
             i++;
         }
 
-        if(!x)
+        if(!varFound)
             co[i] = str[i];
         else {
             if(str[i] == '^')
-                flag++;
+                caratFound++;
             else {
                 ex[j] = str[i];
                 j++;
@@ -190,18 +188,38 @@ term extract(char *str, int nega) {
     t.coef = atoi(co);
     t.expo = atoi(ex);
     
-    // case x, coeffiecient is 1
-    if(t.coef == 0 && x == 1)
+    // case varFound, coeffiecient is 1
+    if(t.coef == 0 && varFound == 1)
         t.coef = 1;
     
-    // case x, exponent is 1
-    if(t.expo == 0 && x && !flag)
+    // case varFound, exponent is 1
+    if(t.expo == 0 && varFound && !caratFound)
         t.expo = 1;
 
     if(nega)
         t.coef *= -1;
 
     return t;
+}
+
+void sortTerms(list *l) {
+    node *curr = l->head;
+
+    while(curr != NULL) {
+        node *other = curr->next;
+
+        while(other != NULL) {
+            if(curr->item.expo < other->item.expo) {
+                term t = curr->item;
+                curr->item = other->item;
+                other->item = t;
+            }
+
+            other = other->next;
+        }
+
+        curr = curr->next;
+    }
 }
 
 // tokenizes the string and getting each single term in an expression and appending the term to the list
@@ -279,25 +297,5 @@ int tokenize(list *poly, char inputString[]) {
         */
 
         return 1;
-    }
-}
-
-void sortTerms(list *l) {
-    node *curr = l->head;
-
-    while(curr != NULL) {
-        node *other = curr->next;
-
-        while(other != NULL) {
-            if(curr->item.expo < other->item.expo) {
-                term t = curr->item;
-                curr->item = other->item;
-                other->item = t;
-            }
-
-            other = other->next;
-        }
-
-        curr = curr->next;
     }
 }
